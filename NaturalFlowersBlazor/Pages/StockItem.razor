@@ -1,0 +1,136 @@
+﻿@page "/stock/{id:int}"
+
+@using NaturalFlowers.Models;
+@using NaturalFlowers.ViewModels;
+@using NaturalFlowersBlazor.Services;
+@using Blazorise;
+
+@inject StockService svc;
+@inject NavigationManager nav;
+@inject ReviewService reviewSvc;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync;
+
+<PageTitle>Stock</PageTitle>
+
+<div style="display: flex; align-content: center; width:100%; height:100vh; background-color:#97BB8E; ">
+    @if (item != null)
+    {
+        <div style="margin-left: auto; margin-right: auto; margin-top: 100px; border-radius: 10px; width: 50vw; background-color:#97BB8E;">
+
+            <div style="display: flex; flex-direction: row; margin-left: auto; margin-right: auto; cursor:pointer; justify-content: center;">
+                <img style="border: 1px solid black; border-radius: 150px; width:230px; height: 230px;" src="https://images.rawpixel.com/image_png_1000/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjIzLXotZWxlbWVudGdyb3VwMS0wMDEtdGV4dC10cC0wMy5wbmc.png">
+                <Div Style="display:flex; flex-direction: column; margin-left: 20px; padding: 10px;">
+                    <span style="font-size:50px; margin-bottom: 5px;">@item.FriendlyName</span>
+                    <div style="display:flex; flex-direction: row;">
+                        @for (int i = 0; i < item.Score; i++)
+                        {
+                            <img style="height: 30px; width: 30px; margin-left: 5px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
+                        }
+                    </div>
+                    <Div id="payDetails" Style="display: flex; flex-direction: row; margin-top: 10px;">
+                        <Span Style="font-size: 20px; margin-right: 10px;">Quantity: </Span>
+                        <Select TValue="int" SelectedValue="@selectedQuantity">
+                            @foreach(var quantity in item.Quantities)
+                            {
+                                <SelectItem Value=quantity>@quantity</SelectItem>
+                            }
+                        </Select>
+                    </Div>
+                    <Span Style="font-size: 20px;"><b>$@item.Price (1)</b></Span>
+                    
+                </Div>
+                
+            </div>
+            
+            <Divider Style="margin-top:20px;"/>
+            <p style="font-size: 18px;">@item.Description</p>
+            <Divider Style="margin-top:20px;" />
+            
+            <h3>See what others thought: </h3>
+
+            <AuthorizeView>
+                <Authorized>
+                    <Field Style="display: flex; flex-direction:row;">
+                        <FieldLabel>Rating: </FieldLabel>
+                        <NumericEdit Style="max-width:40px; margin-left: 5px;" Size="Size.ExtraSmall" TValue="int" @bind-Value="@reviewScore" Min="1" Max="4"></NumericEdit>
+                    </Field>
+                    <TextEdit Placeholder="Let us know what you thought of this product!" @bind-Text="@reviewText" />
+                    <Button Style="margin-top:10px; margin-bottom: 20px;" Color="Color.Info" Clicked="PostReview">Post Review</Button>
+                </Authorized>
+                <NotAuthorized>
+
+                </NotAuthorized>
+            </AuthorizeView>
+
+            <Div Style="max-height: 300px; overflow-y: scroll; background-color:#97BB8E; padding: 20px;">
+                @foreach (var review in item.Reviews)
+                {
+                    <Div Style="border:1px solid lightgrey; width: 100%; height: 100px; margin-top: 20px; padding: 10px; border-radius: 10px">
+                        <div style="display:flex; flex-direction: row;">
+                            @for (int i = 0; i < review.Rating; i++)
+                            {
+                                <img style="height: 30px; width: 30px; margin-left: 5px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
+                            }
+                        </div>
+                        <Span Style="margin-top:20px; margin:6px; font-size:20px">@review.Comment</Span>
+                    </Div>
+                }
+            </Div>
+        </div>
+        
+    }
+   
+
+</div>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    public ItemViewModel item = new ItemViewModel();
+
+    private Virtualize<ReviewViewModel> virtualizer { get; set; }
+
+    public int selectedQuantity { get; set; } // Selected Item quantity in select component
+
+    public string reviewText { get; set; } // Text of review to be posted
+    public int reviewScore { get; set; } // Score of review to be posted
+
+    protected async override void OnParametersSet()
+    {
+        item = await this.svc.GetSingleItemAsync(id);
+
+        this.StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await this.GetItems();
+    }
+
+    public async Task PostReview()
+    {
+        var authstate = await GetAuthenticationStateAsync.GetAuthenticationStateAsync();
+        var userId = authstate.User.Claims.First().Value;
+
+        ReviewViewModel reviewViewModel = new ReviewViewModel();
+
+        reviewViewModel.UserId = userId;
+        reviewViewModel.Comment = reviewText;
+        reviewViewModel.ItemId = item.Id;
+
+        if (reviewScore == 0)
+            reviewScore = 1;
+
+        reviewViewModel.Rating = reviewScore;
+
+        await this.reviewSvc.PostReviewAsync(reviewViewModel);
+
+        item = await this.svc.GetSingleItemAsync(id);
+
+        reviewText = "";
+        reviewScore = 1;
+
+        this.StateHasChanged();
+    }
+}

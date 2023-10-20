@@ -1,0 +1,155 @@
+﻿@page "/stock"
+
+@using NaturalFlowers.Models;
+@using NaturalFlowers.ViewModels;
+@using NaturalFlowersBlazor.Services;
+@using Blazorise;
+
+@inject StockService svc;
+@inject NavigationManager nav;
+
+<PageTitle>Stock</PageTitle>
+
+<div style="display: flex; flex-direction: column; width:100%; background-color:#97BB8E; padding: 20px;">
+    <div style="display: flex; align-items: center; margin-top: 100px; border: 1px solid black; border-radius: 10px; margin-bottom: 20px;">
+        @*Filter Components here\*@
+        <Div Style="margin: 10px; display: flex; flex-direction: row; align-items:center;">
+            <Field>
+                <FieldLabel>Search for flora...</FieldLabel>
+                <TextEdit @onkeyup="@Enter" @bind-Text="@FilterText"></TextEdit>
+            </Field>
+            @if (FilterHidden == true)
+            {
+                <Tooltip Text="Toggle extra filter settings"><Button Style="margin-top:15px; max-height: 3em; margin-left: 10px;" Size="Size.Medium" Color="Color.Primary" Clicked="ToggleFilters"><Icon Name="IconName.ArrowUp"></Icon></Button></Tooltip>
+            } else
+            {
+                <Tooltip Text="Toggle extra filter settings"><Button Style="margin-top:15px; max-height: 3em; margin-left: 10px;" Size="Size.Medium" Color="Color.Primary" Clicked="ToggleFilters"><Icon Name="IconName.ArrowDown"></Icon></Button></Tooltip>
+            }
+        </Div>
+
+        <Div Style="margin-left: 20px; display: flex; flex-direction: row;" hidden="@FilterHidden">
+            <Field Style="margin-left: 10px;">
+                <FieldLabel>Max Price: </FieldLabel>
+                <NumericEdit TValue="decimal" @bind-Value="@FilterPrice"></NumericEdit>
+            </Field>
+            <Field Style="margin-left: 10px;">
+                <FieldLabel>Minimum Rating:</FieldLabel>
+                <NumericEdit TValue="long" @bind-Value="@FilterScore" Min="1" Max="4"></NumericEdit>
+            </Field>
+        </Div>
+
+    </div>
+    
+    <div style="display: flex; flex-direction: column;  background-color:#97BB8E;">
+        @*@if(items != null)*@
+        @*{*@
+        <div style="display:flex; flex-direction: row; align-content:start; flex-wrap:wrap; margin-bottom: auto; ">
+            <Virtualize @ref="virtualizer" Context="item" ItemsProvider="@LoadItems" OverscanCount="2">
+                <a style="text-decoration:none; float:left; font-size:20px; padding: 2%; display: flex; flex-basis: 16%;" href="/stock/@item.Id">
+                    <div style="display: flex; flex-direction: column; max-width: 350px; max-height: 350px; align-items:center; cursor:pointer;">
+                        <img style="border: 2px solid black; border-radius: 20px; width:200px; height: 200px;" src="https://images.rawpixel.com/image_png_1000/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjIzLXotZWxlbWVudGdyb3VwMS0wMDEtdGV4dC10cC0wMy5wbmc.png">
+                        <span>@item.FriendlyName</span>
+                        <div style="display:flex; flex-direction: row;">
+                            @for(int i = 0; i < 4; i++)
+                            {
+                            <img style="height: 8px; width: 8px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
+                            }
+                        </div>
+                    </div>
+                </a>
+            </Virtualize>
+            </div>
+        @*}*@
+    </div>
+    
+</div>
+
+
+@code {
+    public List<Item> items = new List<Item>();
+    private string FilterText { get; set; }
+    private decimal FilterPrice { get; set; }
+    private long FilterScore { get; set; }
+    private bool FilterHidden { get; set; } = true;
+
+    private Virtualize<ItemViewModel> virtualizer { get; set; }
+
+    //public virtual async Task SetParametersAsync()
+    //{
+    //    items = await this.svc.GetPopularItemsAsync();
+    //}
+
+    public void ToggleFilters()
+    {
+        FilterHidden = !FilterHidden;
+        this.StateHasChanged();
+    }
+
+    public async Task<StockFilterViewModel> GetFilter(int StartIndex, int Count)
+    {
+        StockFilterViewModel filter = new StockFilterViewModel();
+
+        if (this.FilterText == "" || this.FilterText == " ")
+        {
+            filter.SearchText = null;
+        }
+        else
+        {
+            filter.SearchText = this.FilterText;
+        }
+
+        if (this.FilterPrice <= 0)
+        {
+            filter.MaxPrice = null;
+        }
+        else
+        {
+            filter.MaxPrice = this.FilterPrice;
+        }
+
+        if (this.FilterScore <= 0 || this.FilterScore > 4)
+        {
+            filter.NumStars = null;
+        }
+        else
+        {
+            filter.NumStars = this.FilterScore;
+        }
+
+        filter.PageStartIndex = StartIndex;
+        filter.PageCount = Count;
+
+        return filter;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        //await this.GetItems();
+    }
+
+    private async ValueTask<ItemsProviderResult<ItemViewModel>> LoadItems(ItemsProviderRequest request)
+    {
+        //await loadingIndicator.Show();
+        //vm = await profileService.GetMyProfile();
+        StockFilterViewModel response = await this.GetFilter(request.StartIndex,request.Count);
+        response = (await svc.GetAllItems(response));
+        
+        //await loadingIndicator.Hide();
+        return new ItemsProviderResult<ItemViewModel>(response.Items, response.TotalItemsCount - response.PageOffset);
+    }
+
+    public async Task Enter(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" || e.Code == "NumpadEnter")
+        {
+            await ApplyFilter();
+        }
+    }
+
+    private async Task ApplyFilter()
+    {
+        await virtualizer.RefreshDataAsync();
+        
+        this.StateHasChanged();
+    }
+}

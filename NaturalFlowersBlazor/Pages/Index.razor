@@ -1,0 +1,58 @@
+﻿@page "/"
+@using NaturalFlowers.Models;
+@using NaturalFlowersBlazor.Services;
+@using Blazorise;
+@inject IndexService svc;
+@inject NavigationManager nav;
+
+<PageTitle>Home</PageTitle>
+
+<div style="display: flex;">
+    <div style="display: flex; align-items: center;width:50vw; height:100vh; background-image: url(https://img.freepik.com/free-vector/hand-painted-exotic-floral-pattern_52683-54355.jpg?w=1480&t=st=1694761091~exp=1694761691~hmac=3cfb1956b532b68942eda85abb79ff78f262084514e1ae872224fbe3bc2590cb);">
+        <h1 class="brand" style="-webkit-text-stroke: 2px black; margin: auto; font-weight:700; color: white; font-size: 100px;">Natural<br />Flowers</h1>
+    </div>
+    <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; width:50vw; height:100vh; background-color:#97BB8E;">
+        @*@if(items != null)*@
+        @*{*@
+        <h1 style="margin-top:auto; font-weight:700;font-family: 'Brush Script MT', cursive;">Popular Picks</h1>
+        <div style="display:flex; flex-direction: row; flex-wrap:wrap; align-items: center; margin-left: auto; margin-right: auto; margin-bottom: auto;justify-content:space-between; width: 35vw;">
+                @foreach(Item item in items)
+                {
+                <a href="/stock/@item.Id" style="text-decoration: none;">
+                        <div style="display: flex; flex-direction: column; max-width: 200px; max-height: 200px; align-items:center; cursor:pointer; margin-bottom: 15px;">
+                            <img style="border: 1px solid black; border-radius: 20px; width:150px; height: 150px;" src="https://images.rawpixel.com/image_png_1000/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjIzLXotZWxlbWVudGdyb3VwMS0wMDEtdGV4dC10cC0wMy5wbmc.png">
+                            <span>@item.FriendlyName</span>
+                            <div style="display:flex; flex-direction: row;">
+                                @for(int i = 0; i < 4; i++)
+                                {
+                                <img style="height: 15px; width: 15px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
+                                }
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        @*}*@
+    </div>
+    
+</div>
+
+
+@code {
+    public List<Item> items = new List<Item>();
+
+    public virtual async Task SetParametersAsync()
+    {
+        items = await this.svc.GetPopularItemsAsync();
+    }
+
+    public async Task GetPopularPicks()
+    {
+        items = await this.svc.GetPopularItemsAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await this.GetPopularPicks();
+    }
+}
