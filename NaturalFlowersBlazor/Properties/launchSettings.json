@@ -8,8 +8,8 @@
         "NatFlowersConnectionString": "Server=DESKTOP-LUFO56M;Database=NatFlowers;Trusted_Connection=True;MultipleActiveResultSets=true"
       },
       "dotnetRunMessages": true,
-      //"applicationUrl": "https://localhost:7126/"
-      "applicationUrl": "https://naturalflowersas.azurewebsites.net/"
+      "applicationUrl": "https://localhost:7126/"
+      //"applicationUrl": "https://naturalflowersas.azurewebsites.net/"
     },
     "IIS Express": {
       "commandName": "IISExpress",
