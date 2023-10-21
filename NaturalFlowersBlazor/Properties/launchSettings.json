@@ -4,11 +4,12 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "NatFlowersConnectionString": "Server=DESKTOP-LUFO56M;Database=NatFlowers;Trusted_Connection=True;MultipleActiveResultSets=true"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://naturalflowersas.azurewebsites.net"
-      //"applicationUrl": "https://localhost:7126;http://localhost:5098"
+      //"applicationUrl": "https://localhost:7126/"
+      "applicationUrl": "https://naturalflowersas.azurewebsites.net/"
     },
     "IIS Express": {
       "commandName": "IISExpress",
@@ -23,7 +24,6 @@
     "anonymousAuthentication": true,
     "iisExpress": {
       "applicationUrl": "http://localhost:38931",
-     // "applicationUrl": "https://naturalflowersas.azurewebsites.net",
       "sslPort": 44328
     }
   }
