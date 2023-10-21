@@ -15,7 +15,8 @@ using NaturalFlowersBlazor.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("NatFlowersConnectionString");
+var connectionString = System.Environment.GetEnvironmentVariable("NatFlowersConnectionString");
+                       //builder.Configuration.GetConnectionString("NatFlowersConnectionString");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();

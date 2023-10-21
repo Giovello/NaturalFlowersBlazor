@@ -11,8 +11,8 @@ namespace NaturalFlowersBlazor
     {
         public ServiceBase() {
             ApiClient = new HttpClient() {
-                //BaseAddress = new Uri("https://localhost:7126/")
-                BaseAddress = new Uri("https://naturalflowersas.azurewebsites.net/")
+                BaseAddress = new Uri("https://localhost:7126/")
+                //BaseAddress = new Uri("https://naturalflowersas.azurewebsites.net/")
             };
         }
 
