@@ -1,4 +1,5 @@
-﻿using NaturalFlowers.ViewModels;
+﻿using NaturalFlowers.Models;
+using NaturalFlowers.ViewModels;
 using System;
 using System.Collections.Generic;
 
@@ -12,10 +13,20 @@ namespace NaturalFlowers.ViewModels
             Orders = new List<OrderViewModel>();
         }
 
-        public long Id { get; set; }
-        public DateTime CreatedDate { get; set; }
+        public BundleViewModel(Bundle bundle)
+        {
+            this.Id = bundle.Id;
 
-        public virtual ICollection<BundleItemViewModel> BundleItems { get; set; }
-        public virtual ICollection<OrderViewModel> Orders { get; set; }
+
+            BundleItems = new List<BundleItemViewModel>();
+            Orders = new List<OrderViewModel>();
+        }
+
+        
+
+        public long Id { get; set; }
+
+        public virtual List<BundleItemViewModel> BundleItems { get; set; }
+        public virtual List<OrderViewModel> Orders { get; set; }
     }
 }

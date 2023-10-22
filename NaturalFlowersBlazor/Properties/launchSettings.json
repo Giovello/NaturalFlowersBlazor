@@ -5,11 +5,11 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "NatFlowersConnectionString": "Server=DESKTOP-LUFO56M;Database=NatFlowers;Trusted_Connection=True;MultipleActiveResultSets=true"
+        "NatFlowersConnectionString": "Server=DESKTOP-LUFO56M;Database=NatFlowers;Trusted_Connection=True;MultipleActiveResultSets=true",
+        "StripeApi": "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"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7126/"
-      //"applicationUrl": "https://naturalflowersas.azurewebsites.net/"
     },
     "IIS Express": {
       "commandName": "IISExpress",
@@ -20,8 +20,8 @@
     }
   },
   "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
+    "windowsAuthentication": true,
+    "anonymousAuthentication": false,
     "iisExpress": {
       "applicationUrl": "http://localhost:38931",
       "sslPort": 44328
