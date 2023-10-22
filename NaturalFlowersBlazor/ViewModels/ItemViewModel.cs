@@ -31,10 +31,12 @@ namespace NaturalFlowers.ViewModels
             this.Id = item.Id;
             this.Name = item.Name;
             this.CreatedDate = item.CreatedDate;
+            this.StripeId = item.StripeId;
         }
         
 
         public long Id { get; set; }
+        public string StripeId { get; set; }
         public string Name { get; set; } = null!;
         public string FriendlyName { get; set; } = null!;
         public decimal Price { get; set; }

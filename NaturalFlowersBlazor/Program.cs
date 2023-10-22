@@ -1,6 +1,7 @@
 using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
@@ -11,6 +12,7 @@ using NaturalFlowers.Models;
 using NaturalFlowersBlazor.Areas.Identity;
 using NaturalFlowersBlazor.Data;
 using NaturalFlowersBlazor.Services;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,9 +27,6 @@ builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfi
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<User>>();
-//builder.Services.AddScoped<ApiAuthenticationStateProvider>();
-//builder.Services.AddScoped<AuthenticationStateProvider>(p =>
-                //p.GetRequiredService<ApiAuthenticationStateProvider>());
 
 builder.Services
     .AddBlazorise(options =>
@@ -39,9 +38,15 @@ builder.Services
 
 builder.Services.AddScoped<IndexService>();
 builder.Services.AddScoped<StockService>();
-builder.Services.AddScoped<ReviewService>();
+builder.Services.AddScoped<NaturalFlowersBlazor.Services.ReviewService>();
+builder.Services.AddScoped<OrderService>();
+builder.Services.AddScoped<StripeService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
+
+Stripe.StripeConfiguration.ApiKey = System.Environment.GetEnvironmentVariable("StripeApi");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -63,7 +68,14 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
+
+
 app.UseAuthorization();
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+});
 
 app.MapControllers();
 app.MapBlazorHub();

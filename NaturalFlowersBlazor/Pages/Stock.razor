@@ -6,7 +6,12 @@
 @using Blazorise;
 
 @inject StockService svc;
-@inject NavigationManager nav;
+@inject OrderService orderSvc;
+@inject StripeService stripeSvc;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync;
+@inject INotificationService notifSvc;
+@inject IUserService userSvc;
+@inject NavigationManager navManager;
 
 <PageTitle>Stock</PageTitle>
 
@@ -45,25 +50,77 @@
         @*{*@
         <div style="display:flex; flex-direction: row; align-content:start; flex-wrap:wrap; margin-bottom: auto; ">
             <Virtualize @ref="virtualizer" Context="item" ItemsProvider="@LoadItems" OverscanCount="2">
-                <a style="text-decoration:none; float:left; font-size:20px; padding: 2%; display: flex; flex-basis: 16%;" href="/stock/@item.Id">
+                <Div style="text-decoration:none; float:left; font-size:20px; padding: 2%; display: flex; flex-basis: 16%;" >
                     <div style="display: flex; flex-direction: column; max-width: 350px; max-height: 350px; align-items:center; cursor:pointer;">
-                        <img style="border: 2px solid black; border-radius: 20px; width:200px; height: 200px;" src="https://images.rawpixel.com/image_png_1000/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjIzLXotZWxlbWVudGdyb3VwMS0wMDEtdGV4dC10cC0wMy5wbmc.png">
-                        <span>@item.FriendlyName</span>
-                        <div style="display:flex; flex-direction: row;">
-                            @for(int i = 0; i < 4; i++)
-                            {
-                            <img style="height: 8px; width: 8px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
-                            }
-                        </div>
+                        <a href="/stock/@item.Id">
+                            <img style="border: 2px solid black; border-radius: 150px; width:200px; height: 200px;" src="https://images.rawpixel.com/image_png_1000/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjIzLXotZWxlbWVudGdyb3VwMS0wMDEtdGV4dC10cC0wMy5wbmc.png">
+                        </a>
+                            <span>@item.FriendlyName</span>
+                        <Div Style="display: flex; flex-direction: row; margin-top: 10px;">
+                            <div style="display:flex; flex-direction: row;">
+                                @for(int i = 0; i < item.Score; i++)
+                                {
+                                <img style="height: 15px; width: 15px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
+                                }
+                            </div>
+                            <AuthorizeView>
+                                <Authorized>
+                                    <Tooltip Text="Add item to cart"><Button Clicked="() => AddItemToBundle(item)" Size="Size.ExtraSmall" Style="margin-left: 10px; cursor:pointer; bottom: 10px; position: relative;" Color="Color.Warning"><Icon Name="IconName.PlusSquare" IconStyle="IconStyle.Regular"></Icon></Button></Tooltip>
+                                </Authorized>
+                            </AuthorizeView>
+                        </Div>
                     </div>
-                </a>
+                </Div>
             </Virtualize>
             </div>
         @*}*@
     </div>
     
+    <AuthorizeView>
+        <Authorized>
+            <Div Style="position: fixed; bottom: 10px; right: 10px;"><Icon Clicked="ShowOffcanvas" Style="cursor: pointer;" IconSize="IconSize.x3" Name="IconName.ShoppingCart" IconStyle="IconStyle.Solid"></Icon></Div>
+        </Authorized>
+    </AuthorizeView>
 </div>
 
+
+<Offcanvas @ref="offcanvasRef" ShowBackdrop Placement="Placement.End">
+    <OffcanvasHeader>
+        <CloseButton Clicked="@HideOffcanvas" />
+    </OffcanvasHeader>
+    <OffcanvasBody>
+        @if (this.bundle != null)
+        {
+            <div class="cart-container">
+                <h4>Your Shopping Cart</h4>
+                <ul class="cart-items">
+                    @foreach (var item in this.bundle.BundleItems)
+                    {
+                        <li class="cart-item">
+                            <div class="cart-item-details">
+                                <img src="https://images.rawpixel.com/image_png_1000/cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjIzLXotZWxlbWVudGdyb3VwMS0wMDEtdGV4dC10cC0wMy5wbmc.png" alt="@item.Item.FriendlyName" />
+                                <div class="item-info">
+                                    <span class="product-name">@item.Item.FriendlyName</span>
+                                    <span class="product-price">$@item.Item.Price</span>
+                                </div>
+                            </div>
+                            <div class="item-quantity">
+                                <button @onclick="() => RemoveItemToBundle(item.Item)">-</button>
+                                <span>@item.Amount</span>
+                                <button @onclick="() => AddItemToBundle(item.Item)">+</button>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <div class="cart-summary">
+                    <span class="total-label">Total:</span>
+                    <span class="total-price">$@CalculateTotalPrice()</span>
+                </div>
+                <button @onclick="() => ProceedToCheckout(this.bundle)" class="checkout-button">Checkout</button>
+            </div>
+        }
+    </OffcanvasBody>
+</Offcanvas>
 
 @code {
     public List<Item> items = new List<Item>();
@@ -71,6 +128,8 @@
     private decimal FilterPrice { get; set; }
     private long FilterScore { get; set; }
     private bool FilterHidden { get; set; } = true;
+    private Offcanvas offcanvasRef;
+    BundleViewModel bundle { get; set; }
 
     private Virtualize<ItemViewModel> virtualizer { get; set; }
 
@@ -151,5 +210,55 @@
         await virtualizer.RefreshDataAsync();
         
         this.StateHasChanged();
+    }
+
+    private async void AddItemToBundle(ItemViewModel item)
+    {
+        this.bundle = await orderSvc.AddItemToOrderBundle(item, 1);
+
+        this.StateHasChanged();
+        
+    }
+
+    private async void RemoveItemToBundle(ItemViewModel item)
+    {
+        this.bundle = await orderSvc.RemoveItemFromOrderBundle(item);
+
+        this.StateHasChanged();
+    }
+
+    private decimal? CalculateTotalPrice()
+    {
+        decimal? totalPrice = 0;
+
+        foreach (BundleItemViewModel bund in this.bundle.BundleItems)
+        {
+            totalPrice += (bund.Amount * bund.Item.Price);
+        }
+
+        return totalPrice;
+    }
+
+    private async void ProceedToCheckout(BundleViewModel bundle)
+    {
+        var userId = await this.userSvc.GetUserIdAsync();
+
+        var stripeUrl = await stripeSvc.CreateCheckout(bundle, userId);
+
+        navManager.NavigateTo(stripeUrl, true);
+    }
+
+    private async Task ShowOffcanvas()
+    {
+        this.bundle = await orderSvc.GetOrderBundle();
+
+        this.StateHasChanged();
+
+        await this.offcanvasRef.Show();
+    }
+
+    private async Task HideOffcanvas()
+    {
+        await this.offcanvasRef.Hide();
     }
 }
