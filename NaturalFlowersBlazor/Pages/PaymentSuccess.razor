@@ -1,0 +1,64 @@
+﻿@page "/success/{bundleId:int}"
+@using NaturalFlowers.Models;
+@using NaturalFlowers.ViewModels
+@using NaturalFlowersBlazor.Services;
+@using Blazorise;
+@inject OrderService orderSvc;
+@inject NavigationManager nav;
+
+<PageTitle>Payment Success</PageTitle>
+
+<div style="display: flex; flex-direction: column; position: absolute; top: 100px; margin: auto; align-items: center; width: 100%;">
+    @if (order != null)
+    {
+        <h1>Order Confirmed!</h1>
+
+        <p>Thank you for your purchase. Your order number is <b>#@order.Id</b>. Here is a summary of your items:</p>
+
+        <div class="order-summary">
+            @foreach (var item in order.Bundle.BundleItems)
+            {
+                <div class="order-item">
+                    <div class="item-name">@item.Item.FriendlyName</div>
+                    <div class="item-details">
+                        <div class="quantity"><b>Quantity:</b> @item.Amount</div>
+                        <div class="price"><b>Price:</b> $@item.Item.Price</div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <p style="margin-top: 20px;"><b>Total Amount:</b> $@CalculateTotalPrice()</p>
+    }
+    
+</div>
+
+
+@code {
+    [Parameter]
+    public int bundleId { get; set; }
+
+    public OrderViewModel order { get; set; }
+
+    protected async override void OnParametersSet()
+    {
+        order = await this.orderSvc.ConfirmOrderAsync(bundleId);
+
+        this.StateHasChanged();
+    }
+
+    private decimal? CalculateTotalPrice()
+    {
+        decimal? totalPrice = 0;
+
+        foreach (BundleItemViewModel bund in this.order.Bundle.BundleItems)    
+        {
+            totalPrice += (bund.Amount * bund.Item.Price);
+        }
+
+        totalPrice = totalPrice * Decimal.Parse("1.13");
+
+        return totalPrice;
+    }
+
+}

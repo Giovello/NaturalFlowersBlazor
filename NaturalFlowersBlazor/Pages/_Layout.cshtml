@@ -16,7 +16,32 @@
 
 	<link href="_content/Blazorise/blazorise.css" rel="stylesheet" />
 	<link href="_content/Blazorise.Bootstrap/blazorise.bootstrap.css" rel="stylesheet" />
+    <link href="_content/Blazorise.Snackbar/blazorise.snackbar.css" rel="stylesheet" />
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
+    <style>
+        /* width */
+        ::-webkit-scrollbar {
+          width: 10px;
+          border-radius: 10px;
+        }
+
+        /* Track */
+        ::-webkit-scrollbar-track {
+          background: #f1f1f1; 
+          border-radius: 10px;
+        }
+ 
+        /* Handle */
+        ::-webkit-scrollbar-thumb {
+          background: #888; 
+          border-radius: 10px;
+        }
+
+        /* Handle on hover */
+        ::-webkit-scrollbar-thumb:hover {
+          background: #555; 
+        }
+    </style>
 </head>
 <body style="background-color:#97BB8E; height:100%;">
     @RenderBody()

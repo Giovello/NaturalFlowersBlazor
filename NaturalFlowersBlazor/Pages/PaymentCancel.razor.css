@@ -1,0 +1,32 @@
+brand {
+    -webkit-text-stroke: 2px black; /* width and color */
+}
+
+.order-summary {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 10px;
+    margin: auto;
+    max-height: 350px;
+    overflow-y: scroll;
+}
+
+.order-item {
+    padding: 5px;
+    display: flex;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+.item-name {
+    flex: 2;
+    font-weight: bold;
+}
+
+.item-details {
+    flex: 1;
+}
+
+.quantity, .price {
+    margin: 3px 0;
+}
