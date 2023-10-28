@@ -246,6 +246,8 @@
     {
         this.bundle = await orderSvc.AddItemToOrderBundle(item, 1);
 
+        await this.notifSvc.Success($"{item.FriendlyName} added to cart!");
+
         this.StateHasChanged();
 
     }
@@ -253,6 +255,8 @@
     private async void RemoveItemToBundle(ItemViewModel item)
     {
         this.bundle = await orderSvc.RemoveItemFromOrderBundle(item);
+
+        await this.notifSvc.Success($"{item.FriendlyName} removed from cart!");
 
         this.StateHasChanged();
     }
