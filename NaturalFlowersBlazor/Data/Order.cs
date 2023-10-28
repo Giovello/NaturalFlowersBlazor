@@ -7,7 +7,8 @@ namespace NaturalFlowers.Models
     {
         public long Id { get; set; }
         public string UserId { get; set; }
-        public bool IsComplete { get; set; }
+        public bool IsComplete { get; set; } = false;
+        public bool IsInProgress { get; set; } = false;
         public DateTime CreatedDate { get; set; }
         public long BundleId { get; set; }
 

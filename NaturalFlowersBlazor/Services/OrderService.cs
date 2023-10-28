@@ -49,5 +49,40 @@ namespace NaturalFlowersBlazor.Services
 
             return bundleItem;
         }
+
+        public async Task<OrderViewModel> ConfirmOrderAsync(int id)
+        {
+            var userId = await _userService.GetUserIdAsync();
+
+            var result = await ApiClient.GetAsync($"order/confirm/{id}");
+
+            var order = await result.Content.ReadFromJsonAsync<OrderViewModel>();
+
+            return order;
+        }
+
+        public async Task UpdateUserAddressBeforeOrder(string address, string province, string country, string postalCode, string fullName)
+        {
+            var userId = await _userService.GetUserIdAsync();
+
+            AddressSubmitViewModel user = new AddressSubmitViewModel();
+
+            user.UserId = userId;
+            user.DeliveryAddress = address;
+            user.Province = province;
+            user.Country = country;
+            user.PostalCode = postalCode;
+            user.FullName = fullName;
+
+            var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(user), Encoding.UTF8, "application/json");
+
+            var result = await ApiClient.PutAsync($"order/updateAddress", content);
+
+            //var result = await ApiClient.GetAsync($"order/updateAddress");
+
+
+            return;
+        }
+        
     }
 }

@@ -4,24 +4,30 @@ using System.Collections.Generic;
 
 namespace NaturalFlowers.ViewModels
 {
-    public partial class OrderViewModel
+    public class OrderViewModel
     {
-        OrderViewModel(Order order) 
+        public OrderViewModel(Order order) 
         {
-            this.CreatedDate = order.CreatedDate;
+            this.Id = order.Id;
             this.UserId = order.UserId;
             this.BundleId = order.BundleId;
             this.IsComplete = order.IsComplete;
+            this.IsInProgress = order.IsInProgress;
+            this.CreatedDate = order.CreatedDate;
         }
 
+        public OrderViewModel()
+        {}
 
-        public long Id { get; set; }
-        public string UserId { get; set; }
-        public bool IsComplete { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public long BundleId { get; set; }
 
-        public virtual BundleViewModel Bundle { get; set; } = null!;
-        public virtual UserViewModel User { get; set; } = null!;
+        public long? Id { get; set; }
+        public string? UserId { get; set; }
+        public bool? IsComplete { get; set; }
+        public bool? IsInProgress { get; set; }
+        public long? BundleId { get; set; }
+        public DateTime? CreatedDate { get; set; }
+
+        public BundleViewModel? Bundle { get; set; }
+        public UserViewModel? User { get; set; }
     }
 }

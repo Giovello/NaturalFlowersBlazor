@@ -12,7 +12,7 @@ namespace NaturalFlowers.ViewModels
             Reviews = new List<ReviewViewModel>();
         }
 
-        public long Id { get; set; }
+        public string Id { get; set; }
         public string Email { get; set; } = null!;
         public string Password { get; set; } = null!;
         public string DeliveryAddress { get; set; } = null!;
@@ -30,9 +30,8 @@ namespace NaturalFlowers.ViewModels
         public string? BusinessDeliveryAddress { get; set; }
         public string? BusinessPhone { get; set; }
         public bool IsAdmin { get; set; }
-        public DateTime CreatedDate { get; set; }
 
-        public virtual ICollection<OrderViewModel> Orders { get; set; }
-        public virtual ICollection<ReviewViewModel> Reviews { get; set; }
+        public List<OrderViewModel> Orders { get; set; }
+        public List<ReviewViewModel> Reviews { get; set; }
     }
 }
