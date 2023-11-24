@@ -9,16 +9,20 @@ namespace NaturalFlowers.ViewModels
     {
         public ItemViewModel()
         {
-            Reviews = new List<ReviewViewModel>();
-            Quantities = new List<int>();
-            BulkQuantities = new List<int>();  
-    }
+            this.Reviews = new List<ReviewViewModel>();
+            this.Quantities = new List<int>();
+            this.BulkQuantities = new List<int>();
+        }
 
         public ItemViewModel(Item item)
         {
             this.Description = item.Description;
             this.Reviews = new List<ReviewViewModel>();
+            this.Quantities = new List<int>();
+            this.BulkQuantities = new List<int>();
             this.Quantities = item.Quantities.Split(',').Select(int.Parse).ToList();
+            this.StringQuantities = item.Quantities;
+            this.StringBulkQuantities = item.BulkQuantities;
 
             if(!String.IsNullOrEmpty(item.BulkQuantities))
                 this.BulkQuantities = item.BulkQuantities.Split(',').Select(int.Parse).ToList();
@@ -44,9 +48,11 @@ namespace NaturalFlowers.ViewModels
         public int Stock { get; set; }
         public int DetainedStock { get; set; }
         public string Description { get; set; } = null!;
-        public List<int> Quantities { get; set; } = null!;
+        public List<int>? Quantities { get; set; } = null!;
+        public string StringQuantities { get; set; }
         public List<int>? BulkQuantities { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public List<ReviewViewModel> Reviews { get; set; }
+        public string? StringBulkQuantities { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public List<ReviewViewModel>? Reviews { get; set; }
     }
 }

@@ -1,0 +1,190 @@
+﻿@page "/admin"
+
+@using NaturalFlowers.Models;
+@using NaturalFlowers.ViewModels;
+@using NaturalFlowersBlazor.Services;
+@using Blazorise;
+@using Blazorise.DataGrid;
+
+@inject StockService svc;
+@inject NavigationManager nav;
+@inject ReviewService reviewSvc;
+@inject OrderService orderSvc;
+@inject StripeService stripeSvc;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync;
+@inject INotificationService notifSvc;
+@inject IUserService userSvc;
+@inject NavigationManager navManager;
+@inject ProfileService profSvc;
+
+<PageTitle>Admin</PageTitle>
+<Div Style="margin-top:100px;"></Div>
+<Tabs SelectedTab="@selectedTab" SelectedTabChanged="@OnSelectedTabChanged">
+    <Items>
+        <Tab Name="stock">Stock</Tab>
+        <Tab Name="test">Test</Tab>
+    </Items>
+    <Content>
+        <TabPanel Name="stock">
+            @if (items != null)
+            {
+    
+
+            <DataGrid TItem="ItemViewModel" 
+                @ref="grid"
+                Data="items" 
+                Editable
+                @bind-SelectedRow="@selectedItem"
+                EditMode="DataGridEditMode.Inline"
+                Responsive
+                ShowPager = "true"
+                CommandMode="DataGridCommandMode.Commands"
+                RowInserted="@OnRowInserted"
+                RowUpdated="@OnRowUpdated"
+                RowRemoved="@OnRowRemoved">
+                <DataGridColumns>
+                    @*<DataGridCommandColumn>
+                        <NewCommandTemplate>
+                            <Tooltip Text="Add New Item">
+                                <Div Style="cursor:pointer" @onclick="@(() => context.Clicked.InvokeAsync())"><Icon IconSize="Blazorise.IconSize.Large" Class="fa-light fa-square-plus"></Icon></Div>
+                            </Tooltip>
+                        </NewCommandTemplate>
+                        <EditCommandTemplate>
+                            <Tooltip Text="Edit">
+                                <Div Style="cursor:pointer" @onclick="@(() => grid.Edit(context.Item))"><Icon IconSize="Blazorise.IconSize.Large" Class="fa-light fa-square-pen"></Icon></Div>
+                            </Tooltip>
+                        </EditCommandTemplate>
+                        <SaveCommandTemplate>
+                            <Tooltip Text="Save">
+                                <Div Style="cursor:pointer" @onclick="@(() => grid.Save())"><Icon IconSize="Blazorise.IconSize.Large" Class="fa-light fa-floppy-disk"></Icon></Div>
+                            </Tooltip>
+                        </SaveCommandTemplate>
+                        <CancelCommandTemplate>
+                            <Tooltip Text="Cancel">
+                                <Div Style="cursor:pointer;margin-right:5px;" @onclick="@(() => grid.Cancel())"><Icon IconSize="Blazorise.IconSize.Large" Class="fa-light fa-ban"></Icon></Div>
+                            </Tooltip>
+                        </CancelCommandTemplate>
+                        <DeleteCommandTemplate>
+                            <Tooltip Text="Delete Item">
+                                <Div Style="cursor:pointer" @onclick="@(() => grid.Delete(context.Item))"><Icon IconSize="Blazorise.IconSize.Large" Class="fa-light fa-square-xmark"></Icon></Div>
+                            </Tooltip>
+                        </DeleteCommandTemplate>
+                    </DataGridCommandColumn>*@
+                    <DataGridCommandColumn />
+                    <DataGridColumn Caption="Name" Field="Name" Editable>
+                    </DataGridColumn>
+                    <DataGridColumn Caption="FriendlyName" Field="FriendlyName" Editable>
+
+                    </DataGridColumn>
+                    <DataGridNumericColumn Caption="Price" Field="Price" Editable>
+
+                    </DataGridNumericColumn>
+                    <DataGridNumericColumn Caption="Stock" Field="Stock" Editable>
+                
+                    </DataGridNumericColumn>
+                    <DataGridNumericColumn Caption="Detained Stock" Field="DetainedStock">
+
+                    </DataGridNumericColumn>
+                    <DataGridColumn Caption="Description" Field="Description" Editable>
+                
+                    </DataGridColumn>
+                    <DataGridNumericColumn Caption="Score" Field="Score" Editable>
+
+                    </DataGridNumericColumn>
+                    <DataGridColumn Caption="Quantities" Field="StringQuantities" Editable>
+
+                    </DataGridColumn>
+                    <DataGridColumn Caption="BulkQuantities" Field="StringBulkQuantities" Editable>
+
+                    </DataGridColumn>
+                    <DataGridColumn Caption="Stripe Id" Field="StripeId" Editable>
+
+                    </DataGridColumn>
+                </DataGridColumns>
+            </DataGrid>
+            }
+
+
+        </TabPanel>
+        <TabPanel Name="test">
+            Content for test.
+        </TabPanel>
+    </Content>
+</Tabs>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    public UserViewModel item = new UserViewModel();
+
+    private Modal bulkModal;
+
+    string selectedTab = "stock";
+
+    private Task OnSelectedTabChanged(string name)
+    {
+        selectedTab = name;
+
+        return Task.CompletedTask;
+    }
+
+    protected async override void OnParametersSet()
+    {
+        var userId = await this.userSvc.GetUserIdAsync();
+        this.item = await this.profSvc.GetProfile(userId);
+
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            this.StateHasChanged();
+        }
+        else
+        {
+
+        }
+
+    }
+
+
+
+
+
+    DataGrid<ItemViewModel> grid;
+    public List<ItemViewModel> items { get; set; }
+
+    public ItemViewModel selectedItem { get; set; }
+
+    private async Task OnRowInserted(SavedRowItem<ItemViewModel, Dictionary<string, object>> savedRowItem)
+    {
+        await svc.AddItemAsync(savedRowItem.Item);
+    }
+
+    private async Task OnRowUpdated(SavedRowItem<ItemViewModel, Dictionary<string, object>> savedRowItem)
+    {
+        await svc.UpdateItemAsync(savedRowItem.Item);
+
+
+    }
+
+    private async Task OnRowRemoved(ItemViewModel item)
+    {
+        await svc.DeleteItemAsync(item);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        await LoadItems();
+    }
+
+    private async Task LoadItems()
+    {
+        var result = await svc.GetAllItemsNoFilter();
+        items = result;
+    }
+   
+}

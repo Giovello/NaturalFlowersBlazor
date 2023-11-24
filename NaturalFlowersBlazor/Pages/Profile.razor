@@ -1,0 +1,188 @@
+﻿@page "/profile"
+
+@using NaturalFlowers.Models;
+@using NaturalFlowers.ViewModels;
+@using NaturalFlowersBlazor.Services;
+@using Blazorise;
+
+@inject StockService svc;
+@inject NavigationManager nav;
+@inject ReviewService reviewSvc;
+@inject OrderService orderSvc;
+@inject StripeService stripeSvc;
+@inject AuthenticationStateProvider GetAuthenticationStateAsync;
+@inject INotificationService notifSvc;
+@inject IUserService userSvc;
+@inject NavigationManager navManager;
+@inject ProfileService profSvc;
+
+<PageTitle>Profile</PageTitle>
+
+@if (item != null)
+{
+
+    <div style="width:100%;  background-color:#97BB8E; margin-top: 50px; ">
+        <h1 style="margin-left: 30px;margin-top:100px">Profile</h1>
+
+        <Div Style="width:100%; display: flex; flex-direction:row; margin-left:30px; gap:100px;">
+            <Div Style="width:30%; display: flex; flex-direction: column;">
+                <Fields Style="display: flex; flex-direction: column;">
+                    <Field>
+                        <FieldLabel>Email</FieldLabel>
+                        <TextEdit Disabled @bind-Text="@item.Email"></TextEdit>
+                    </Field>
+                    <Field>
+                        <FieldLabel>Full Name</FieldLabel>
+                        <TextEdit @bind-Text="@item.FullName"></TextEdit>
+                    </Field>
+                    <Field>
+                        <FieldLabel>Delivery Address</FieldLabel>
+                        <TextEdit @bind-Text="@item.DeliveryAddress"></TextEdit>
+                    </Field>
+                </Fields>
+            </Div>
+            <Div Style="width:30%; display: flex; flex-direction: column;">
+                <Fields Style="display: flex; flex-direction: column;">
+                    <Field>
+                        <FieldLabel>Delivery Province</FieldLabel>
+                        <TextEdit @bind-Text="@item.Province"></TextEdit>
+                    </Field>
+                    <Field>
+                        <FieldLabel>Delivery Country</FieldLabel>
+                        <TextEdit @bind-Text="@item.Country"></TextEdit>
+                    </Field>
+                    <Field>
+                        <FieldLabel>Postal Code</FieldLabel>
+                        <TextEdit @bind-Text="@item.PostalCode"></TextEdit>
+                    </Field>
+                        
+                   </Fields>
+            </Div>
+        </Div>
+        <AuthorizeView>
+            <Authorized>
+                @if (this.item.IsAdmin)
+                {
+                    <a href="admin" Style="position: fixed; bottom: 10px; right: 10px;"><Icon Style="cursor: pointer;" IconSize="IconSize.x3" Name="IconName.Cloud" IconStyle="IconStyle.Solid"></Icon></a>
+                }
+
+            </Authorized>
+        </AuthorizeView>
+    </div>
+    <Div Style="display: flex; flex-direction:row; gap: 20px;">
+    <Button Style="margin-left: 30px;" Color="Color.Primary" Clicked="UpdateProfile">Update</Button>
+    @if (String.IsNullOrEmpty(item.BusinessName) && !item.IsBulkBuyer)
+    {
+        <Button Style="margin-left: 30px;" Color="Color.Primary" Clicked="ShowModal">Apply for Bulk Buyer Status</Button>
+    }
+    </Div>
+}
+
+<Modal @ref="bulkModal">
+    <ModalContent Centered>
+        <ModalHeader>
+            <ModalTitle>Apply For Bulk Buyer Status</ModalTitle>
+            <CloseButton />
+        </ModalHeader>
+        <ModalBody>
+            <Div>
+                <Div Style="width:75%; display: flex; flex-direction: column;">
+                    <Fields Style="display: flex; flex-direction: column;">
+                        <Field>
+                            <FieldLabel>Business Name</FieldLabel>
+                            <TextEdit @bind-Text="@businessName"></TextEdit>
+                        </Field>
+                        <Field>
+                            <FieldLabel>Business Address</FieldLabel>
+                            <TextEdit @bind-Text="@item.BusinessAddress"></TextEdit>
+                        </Field>
+                        <Field>
+                            <FieldLabel>Business Delivery Address</FieldLabel>
+                            <TextEdit @bind-Text="@item.BusinessDeliveryAddress"></TextEdit>
+                        </Field>
+                        <Field>
+                            <FieldLabel>Business Phone</FieldLabel>
+                            <TextEdit @bind-Text="@item.BusinessPhone"></TextEdit>
+                        </Field>
+                    </Fields>
+                </Div>
+            </Div>
+        </ModalBody>
+        <ModalFooter>
+            <Button Color="Color.Secondary" Clicked="@HideModal">Close</Button>
+            <Button Color="Color.Primary" Clicked="@SendApplication">Send Application</Button>
+        </ModalFooter>
+    </ModalContent>
+</Modal>
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    public UserViewModel item = new UserViewModel();
+
+    private Modal bulkModal;
+
+    public string businessName;
+
+    protected async override void OnParametersSet()
+    {
+        var userId = await this.userSvc.GetUserIdAsync();
+        this.item = await this.profSvc.GetProfile(userId);
+
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            this.StateHasChanged();
+        }
+        else
+        {
+
+        }
+
+    }
+
+
+    protected async void UpdateProfile()
+    {
+        await this.profSvc.UpdateProfile(item);
+
+        var userId = await this.userSvc.GetUserIdAsync();
+        item = await this.profSvc.GetProfile(userId);
+
+        this.StateHasChanged();
+
+        await this.notifSvc.Success("Successfully Updated Profile");
+    }
+
+    protected async void SendApplication()
+    {
+        item.BusinessName = businessName;
+
+        await this.profSvc.UpdateProfile(item);
+
+        var userId = await this.userSvc.GetUserIdAsync();
+        item = await this.profSvc.GetProfile(userId);
+
+        this.StateHasChanged();
+
+        this.HideModal();
+
+        await this.notifSvc.Success("Successfully Sent Application");
+
+    }
+
+    private Task ShowModal()
+    {
+        return bulkModal.Show();
+    }
+
+    private Task HideModal()
+    {
+        return bulkModal.Hide();
+    }
+   
+}

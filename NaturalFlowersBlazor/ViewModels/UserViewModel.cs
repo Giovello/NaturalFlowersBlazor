@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using NaturalFlowers.Models;
 using System;
 using System.Collections.Generic;
 
@@ -10,6 +11,34 @@ namespace NaturalFlowers.ViewModels
         {
             Orders = new List<OrderViewModel>();
             Reviews = new List<ReviewViewModel>();
+        }
+
+        public UserViewModel(User user)
+        {
+            Orders = new List<OrderViewModel>();
+            Reviews = new List<ReviewViewModel>();
+
+            this.Id = user.Id;
+            this.Email = user.Email;
+            this.FullName = user.FullName;
+            this.DeliveryAddress = user.DeliveryAddress;
+            this.IsAdmin = user.IsAdmin;
+            this.IsBulkBuyer = user.IsBulkBuyer;
+
+            this.BusinessAddress = user.BusinessAddress;
+            this.BusinessPhone = user.BusinessPhone;
+            this.BusinessDeliveryAddress = user.BusinessDeliveryAddress;
+            this.BusinessName = user.BusinessName;
+
+            this.BillProvince = user.BillProvince;
+            this.BillAddress = user.BillAddress;
+            this.BillCountry = user.BillCountry;
+            this.BillPostalCode = user.BillPostalCode;
+
+            this.Country = user.Country;
+            this.Province = user.Province;
+            this.PostalCode = user.PostalCode;
+
         }
 
         public string Id { get; set; }
