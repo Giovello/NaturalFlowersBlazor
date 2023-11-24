@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using NaturalFlowers.Models;
+@using NaturalFlowers.ViewModels;
 @using NaturalFlowersBlazor.Services;
 @using Blazorise;
 @inject IndexService svc;
@@ -38,9 +39,11 @@
 </div>
 
 
-@code {
-    public List<Item> items = new List<Item>();
 
+@code {
+
+    public List<Item> items = new List<Item>();
+    
     public virtual async Task SetParametersAsync()
     {
         items = await this.svc.GetPopularItemsAsync();
@@ -53,6 +56,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        
+
         await this.GetPopularPicks();
     }
 }

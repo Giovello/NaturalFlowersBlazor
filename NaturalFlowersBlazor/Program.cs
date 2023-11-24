@@ -11,10 +11,12 @@ using Microsoft.EntityFrameworkCore;
 using NaturalFlowers.Models;
 using NaturalFlowersBlazor.Areas.Identity;
 using NaturalFlowersBlazor.Data;
+using NaturalFlowersBlazor.Pages;
 using NaturalFlowersBlazor.Services;
 using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
+//var connectionString = builder.Configuration.GetConnectionString("ApplicationDbContextConnection") ?? throw new InvalidOperationException("Connection string 'ApplicationDbContextConnection' not found.");
 
 // Add services to the container.
 var connectionString = System.Environment.GetEnvironmentVariable("NatFlowersConnectionString");
@@ -36,6 +38,8 @@ builder.Services
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
 builder.Services.AddScoped<IndexService>();
 builder.Services.AddScoped<StockService>();
 builder.Services.AddScoped<NaturalFlowersBlazor.Services.ReviewService>();
@@ -43,7 +47,7 @@ builder.Services.AddScoped<OrderService>();
 builder.Services.AddScoped<StripeService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
+builder.Services.AddScoped<ProfileService>();
 var app = builder.Build();
 
 Stripe.StripeConfiguration.ApiKey = System.Environment.GetEnvironmentVariable("StripeApi");

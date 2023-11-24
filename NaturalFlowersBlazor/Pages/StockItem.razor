@@ -75,17 +75,20 @@
             </AuthorizeView>
 
             <Div Style="max-height: 300px; overflow-y: scroll; background-color:#97BB8E; padding: 20px;">
-                @foreach (var review in item.Reviews)
+                @if (item.Reviews != null)
                 {
-                    <Div Style="border:1px solid lightgrey; width: 100%; height: 100px; margin-top: 20px; padding: 10px; border-radius: 10px">
-                        <div style="display:flex; flex-direction: row;">
-                            @for (int i = 0; i < review.Rating; i++)
-                            {
-                                <img style="height: 30px; width: 30px; margin-left: 5px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
-                            }
-                        </div>
-                        <Span Style="margin-top:20px; margin:6px; font-size:20px">@review.Comment</Span>
-                    </Div>
+                    @foreach (var review in item.Reviews)
+                    {
+                        <Div Style="border:1px solid lightgrey; width: 100%; height: 100px; margin-top: 20px; padding: 10px; border-radius: 10px">
+                            <div style="display:flex; flex-direction: row;">
+                                @for (int i = 0; i < review.Rating; i++)
+                                {
+                                    <img style="height: 30px; width: 30px; margin-left: 5px;" src="https://cdn.imgbin.com/12/9/16/imgbin-gold-star-eighty-one-army-pentagram-element-gold-star-illustration-NwnEBDs3GAhY94KXhS7dFZNaA.jpg" />
+                                }
+                            </div>
+                            <Span Style="margin-top:20px; margin:6px; font-size:20px">@review.Comment</Span>
+                        </Div>
+                    }
                 }
             </Div>
         </div>
@@ -156,6 +159,11 @@
     protected async override void OnParametersSet()
     {
         item = await this.svc.GetSingleItemAsync(id);
+
+        if(item.Reviews == null || item.Reviews.Count == 0)
+        {
+            item.Reviews = new List<ReviewViewModel>();
+        }
 
         this.StateHasChanged();
     }

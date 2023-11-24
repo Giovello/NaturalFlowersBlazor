@@ -28,7 +28,8 @@ namespace NaturalFlowersBlazor.Controllers
             var userEmail = _context.Users.FirstOrDefault(user => user.Id == userId).Email;
 
 
-            var domain = "https://localhost:7126";
+            //var domain = "https://localhost:7126";
+            var domain = "https://naturalflowersas.azurewebsites.net/";
 
             var LineItems = new List<SessionLineItemOptions>();
                 

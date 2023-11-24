@@ -12,6 +12,7 @@
 @inject INotificationService notifSvc;
 @inject IUserService userSvc;
 @inject NavigationManager navManager;
+@inject ProfileService profSvc;
 
 <PageTitle>Stock</PageTitle>
 
@@ -81,6 +82,7 @@
             <Div Style="position: fixed; bottom: 10px; right: 10px;"><Icon Clicked="ShowOffcanvas" Style="cursor: pointer;" IconSize="IconSize.x3" Name="IconName.ShoppingCart" IconStyle="IconStyle.Solid"></Icon></Div>
         </Authorized>
     </AuthorizeView>
+   
 </div>
 
 
@@ -188,6 +190,8 @@
 
     private async ValueTask<ItemsProviderResult<ItemViewModel>> LoadItems(ItemsProviderRequest request)
     {
+
+        //await this.adminSvc.GetSingleItemAsync(1);
         //await loadingIndicator.Show();
         //vm = await profileService.GetMyProfile();
         StockFilterViewModel response = await this.GetFilter(request.StartIndex,request.Count);
