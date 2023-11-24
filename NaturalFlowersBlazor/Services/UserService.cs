@@ -8,22 +8,22 @@ namespace NaturalFlowersBlazor.Services
     public class UserService : ServiceBase, IUserService
     {
         private readonly IHttpContextAccessor _httpContext;
-        [Inject]
-        private AuthenticationStateProvider _AuthProvider { get; set; }
-        public UserService(IHttpContextAccessor httpContext, AuthenticationStateProvider AuthProvider)
+        private readonly AuthenticationStateProvider _GetAuthenticationStateAsync;
+
+
+        public UserService(IHttpContextAccessor httpContext, AuthenticationStateProvider GetAuthenticationStateAsync)
         {
             _httpContext = httpContext;
-            _AuthProvider = AuthProvider;
+            _GetAuthenticationStateAsync = GetAuthenticationStateAsync;
         }
 
 
         public async Task<string> GetUserIdAsync()
         {
-            //return _httpContext.HttpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier);
-            var authstate = await _AuthProvider.GetAuthenticationStateAsync();
-            //this.loginId = authstate.User.Claims.FirstOrDefault(c => c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-
+            var authstate = await _GetAuthenticationStateAsync.GetAuthenticationStateAsync();
             return authstate.User.Claims.First().Value;
+
+            //return _httpContext.HttpContext.User?.FindFirstValue(ClaimTypes.NameIdentifier);
         }
     }
 }

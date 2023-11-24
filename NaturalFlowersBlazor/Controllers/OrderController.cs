@@ -35,7 +35,7 @@ namespace NaturalFlowersBlazor.Controllers
         [HttpGet("{userId}")]
         public async Task<ActionResult> GetUserBundle(string userId)
         {
-            Order order = _context.Orders.Where(ord => ord.UserId == userId && ord.IsComplete == false).FirstOrDefault();
+            Order order = _context.Orders.Where(ord => ord.UserId == userId && ord.IsComplete == false && ord.IsInProgress == false).FirstOrDefault();
 
             if (order == null)
             {
@@ -48,6 +48,7 @@ namespace NaturalFlowersBlazor.Controllers
                 await _context.SaveChangesAsync();
 
                 order.IsComplete = false;
+                order.IsInProgress = false;
                 order.BundleId = order.Bundle.Id;
 
                 await _context.Orders.AddAsync(order);
@@ -80,7 +81,7 @@ namespace NaturalFlowersBlazor.Controllers
         public async Task<ActionResult> AddItemToOrderBundle([FromBody] ItemViewModel item, int quantity, string userId)
         {
 
-            Order order = _context.Orders.Where(ord => ord.UserId == userId && ord.IsComplete == false).FirstOrDefault();
+            Order order = _context.Orders.Where(ord => ord.UserId == userId && ord.IsComplete == false && ord.IsInProgress == false).FirstOrDefault();
 
             if (order == null)
             {
@@ -141,15 +142,19 @@ namespace NaturalFlowersBlazor.Controllers
         public async Task<ActionResult> RemoveItemFromOrderBundle([FromBody] ItemViewModel item, string userId)
         {
 
-            Order order = _context.Orders.Where(ord => ord.UserId == userId && ord.IsComplete == false).FirstOrDefault();
+            Order order = _context.Orders.Where(ord => ord.UserId == userId && ord.IsComplete == false && ord.IsInProgress == false).FirstOrDefault();
 
             Bundle bundle = _context.Bundles.FirstOrDefault(bund => order.BundleId == bund.Id);
 
             BundleItem bundleItem = _context.BundleItems.Where(bundIt => bundIt.BundleId == bundle.Id && bundIt.ItemId == item.Id).FirstOrDefault();
 
-            bundleItem.Amount -= 1;
+            if (bundleItem.Amount > 0)
+            {
+                bundleItem.Amount -= 1;
 
-            if(bundleItem.Amount <= 0)
+            }
+
+            if (bundleItem.Amount <= 0)
             {
                 _context.BundleItems.Remove(bundleItem);
             }
@@ -172,6 +177,56 @@ namespace NaturalFlowersBlazor.Controllers
             }
 
             return Ok(bundleViewModel);
+        }
+
+        [HttpPut("updateAddress")]
+        public async Task<ActionResult> UpdateUserAddressBeforeOrder([FromBody] AddressSubmitViewModel userViewModel)
+        {
+
+            User user = _context.Users.Where(use => use.Id == userViewModel.UserId).FirstOrDefault();
+
+            user.DeliveryAddress = userViewModel.DeliveryAddress;
+            user.Province = userViewModel.Province;
+            user.Country = userViewModel.Country;
+            user.PostalCode = userViewModel.PostalCode;
+            user.FullName = userViewModel.FullName;
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        [HttpGet("confirm/{id}")]
+        public async Task<ActionResult> ConfirmOrder(int id)
+        {
+            Order order = _context.Orders.Where(ord => ord.BundleId == id).FirstOrDefault();
+
+            order.IsInProgress = true;
+
+            await _context.SaveChangesAsync();
+
+            OrderViewModel orderViewModel = new OrderViewModel(order);
+
+            Bundle bundle = _context.Bundles.FirstOrDefault(bund => order.BundleId == bund.Id);
+
+            List<BundleItem> bundleItems = _context.BundleItems.Where(bundIt => bundIt.BundleId == bundle.Id).ToList();
+
+            BundleViewModel bundleViewModel = new BundleViewModel(bundle);
+
+            List<Item> items = _context.Items.ToList();
+
+            foreach (BundleItem bi in bundleItems)
+            {
+                BundleItemViewModel bundleItemViewModel = new BundleItemViewModel(bi);
+
+                bundleItemViewModel.Item = new ItemViewModel(items.FirstOrDefault(it => bi.ItemId == it.Id));
+
+                bundleViewModel.BundleItems.Add(bundleItemViewModel);
+            }
+
+            orderViewModel.Bundle = bundleViewModel;
+
+            return Ok(orderViewModel);
         }
     }
 }

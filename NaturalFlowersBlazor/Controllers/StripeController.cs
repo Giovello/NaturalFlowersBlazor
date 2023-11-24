@@ -26,7 +26,7 @@ namespace NaturalFlowersBlazor.Controllers
         public ActionResult Create([FromBody] BundleViewModel bundle, string userId)
         {
             var userEmail = _context.Users.FirstOrDefault(user => user.Id == userId).Email;
-
+           
 
             //var domain = "https://localhost:7126";
             var domain = "https://naturalflowersas.azurewebsites.net/";
@@ -45,8 +45,8 @@ namespace NaturalFlowersBlazor.Controllers
             var options = new SessionCreateOptions
             {
                 Mode = "payment",
-                SuccessUrl = domain + "/success.html",
-                CancelUrl = domain + "/cancel.html",
+                SuccessUrl = domain + $"success/{bundle.Id}",
+                CancelUrl = domain + "cancel",
                 AutomaticTax = new SessionAutomaticTaxOptions { Enabled = true },
             };
 

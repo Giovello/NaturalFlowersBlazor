@@ -4,9 +4,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "NatFlowersConnectionString": "Server=DESKTOP-LUFO56M;Database=NatFlowers;Trusted_Connection=True;MultipleActiveResultSets=true",
-        "StripeApi": "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"
+        "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7126/",

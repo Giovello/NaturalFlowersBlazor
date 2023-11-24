@@ -133,6 +133,29 @@
                     <span class="total-label">Total:</span>
                     <span class="total-price">$@CalculateTotalPrice()</span>
                 </div>
+
+                <div class="form-container">
+                    <div class="form-row">
+                        <label class="label" for="full-name">Full Name:</label>
+                        <TextEdit class="input" @bind-Text="@FullName" />
+                    </div>
+                    <div class="form-row">
+                        <label class="label" for="delivery-address">Delivery Address:</label>
+                        <TextEdit class="input" @bind-Text="@DeliveryAddress" />
+                    </div>
+                    <div class="form-row">
+                        <label class="label" for="province">Province:</label>
+                        <TextEdit class="input" @bind-Text="@Province" />
+                    </div>
+                    <div class="form-row">
+                        <label class="label" for="country">Country:</label>
+                        <TextEdit class="input" @bind-Text="@Country" />
+                    </div>
+                    <div class="form-row">
+                        <label class="label" for="postal-code">Postal Code:</label>
+                        <TextEdit class="input" @bind-Text="@PostalCode" />
+                    </div>
+                </div>
                 <button @onclick="() => ProceedToCheckout(this.bundle)" class="checkout-button">Checkout</button>
             </div>
         }
@@ -155,6 +178,13 @@
     public int reviewScore { get; set; } // Score of review to be posted
 
     BundleViewModel bundle { get; set; }
+
+    // Address Properties
+    public string FullName { get; set; }
+    public string DeliveryAddress { get; set; }
+    public string Province { get; set; }
+    public string Country { get; set; }
+    public string PostalCode { get; set; }
 
     protected async override void OnParametersSet()
     {
@@ -196,6 +226,8 @@
         reviewText = "";
         reviewScore = 1;
 
+        await this.notifSvc.Success("Review added! ");
+
         this.StateHasChanged();
     }
 
@@ -208,19 +240,23 @@
         {
             this.bundle = await orderSvc.AddItemToOrderBundle(item, selectedQuantity);
 
+            await this.notifSvc.Success($"{item.FriendlyName} added to cart!");
+
             this.StateHasChanged();
         }
     }
 
     private async void RemoveItemToBundle(ItemViewModel item)
     {
-        if (selectedQuantity == 0)
+        if (selectedQuantity <= 0)
         {
             await this.notifSvc.Error("Nothing left to remove! ");
         }
         else
         {
             this.bundle = await orderSvc.RemoveItemFromOrderBundle(item);
+
+            await this.notifSvc.Success($"{item.FriendlyName} removed from cart!");
 
             this.StateHasChanged();
         }
@@ -240,11 +276,19 @@
 
     private async void ProceedToCheckout(BundleViewModel bundle)
     {
-        var userId = await this.userSvc.GetUserIdAsync();
+        if(String.IsNullOrEmpty(DeliveryAddress) || String.IsNullOrEmpty(Province) || String.IsNullOrEmpty(Country) || String.IsNullOrEmpty(PostalCode) || String.IsNullOrEmpty(FullName))
+        {
+            await this.notifSvc.Error("You must provide your delivery details before continuing with your order. ");    
+        }
+        else {
+            await this.orderSvc.UpdateUserAddressBeforeOrder(DeliveryAddress, Province, Country, PostalCode, FullName);
 
-        var stripeUrl = await stripeSvc.CreateCheckout(bundle, userId);
+            var userId = await this.userSvc.GetUserIdAsync();
 
-        navManager.NavigateTo(stripeUrl, true);
+            var stripeUrl = await stripeSvc.CreateCheckout(bundle, userId);
+
+            navManager.NavigateTo(stripeUrl, true);
+        }
     }
 
     private async Task ShowOffcanvas()

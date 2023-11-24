@@ -59,9 +59,8 @@ namespace NaturalFlowers.ViewModels
         public string? BusinessDeliveryAddress { get; set; }
         public string? BusinessPhone { get; set; }
         public bool IsAdmin { get; set; }
-        public DateTime CreatedDate { get; set; }
 
-        public virtual ICollection<OrderViewModel> Orders { get; set; }
-        public virtual ICollection<ReviewViewModel> Reviews { get; set; }
+        public List<OrderViewModel> Orders { get; set; }
+        public List<ReviewViewModel> Reviews { get; set; }
     }
 }
